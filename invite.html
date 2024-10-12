@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Planner Invitation</title>
+</head>
+<body>
+    <h1>Weekly Planner Invitation</h1>
+    <p>If you have the app installed, it should open automatically.</p>
+    <p>If the app doesn't open, please install Weekly Planner from the App Store.</p>
+    <script>
+        function getQueryParam(param) {
+            var searchParams = new URLSearchParams(window.location.search);
+            return searchParams.get(param);
+        }
+        
+        var code = getQueryParam('code');
+        if (code) {
+            var appUrl = "weeklyplanner://invite?code=" + code;
+            window.location.href = appUrl;
+            
+            // Fallback to App Store after a delay
+            setTimeout(function() {
+                window.location.href = "https://apps.apple.com/app/your-app-id";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
