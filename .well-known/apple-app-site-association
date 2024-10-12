@@ -1,11 +1,11 @@
 {
-  "applinks": {
-    "apps": [],
-    "details": [
-      {
-        "appID": "7D6FXJ9R4W.com.tilmiddag.WeeklyPlanner",
-        "paths": ["/invite/*"]
-      }
-    ]
-  }
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "7D6FXJ9R4W.com.tilmiddag.WeeklyPlanner",
+                "paths": ["/invite.html"]
+            }
+        ]
+    }
 }
