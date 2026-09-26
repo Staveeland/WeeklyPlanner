@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The link holds a private token: never pass it on to shops or image hosts. -->
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FFF8F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17120E" media="(prefers-color-scheme: dark)">
+<title>Ønskeliste</title>
+<style>
+  :root {
+    --bg: #FFF8F1;
+    --card: #FFFFFF;
+    --text: #2B2118;
+    --muted: #6B5A4C;
+    --line: rgba(43, 33, 24, 0.10);
+    --shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 8px 24px rgba(60, 40, 20, 0.08);
+    --taken-bg: #F0FDF4;
+    --taken-line: #BBF7D0;
+    --taken-text: #166534;
+    --skeleton: rgba(43, 33, 24, 0.07);
+    /* The person's own colour; set from the list. */
+    --accent-rgb: 190, 24, 93;
+    --accent-strong: #BE185D;
+    --accent-light: #F9A8D4;
+    --accent-text: var(--accent-strong);
+    --button-bg: var(--accent-strong);
+    --button-text: #FFFFFF;
+    --radius: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17120E;
+      --card: #231C17;
+      --text: #F6EEE7;
+      --muted: #BFAF9F;
+      --line: rgba(246, 238, 231, 0.10);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --taken-bg: #14271C;
+      --taken-line: #1F4D33;
+      --taken-text: #86EFAC;
+      --skeleton: rgba(246, 238, 231, 0.08);
+      --accent-text: var(--accent-light);
+      --button-bg: var(--accent-light);
+      --button-text: #17120E;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.45;
+    /* A soft glow of the person's colour behind the header, edge to edge. */
+    background:
+      radial-gradient(160vw 440px at 50% 0, rgba(var(--accent-rgb), 0.20), rgba(var(--accent-rgb), 0)) no-repeat,
+      var(--bg);
+  }
+  .page {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+    flex: 1;
+  }
+  h1, h2, .rounded { font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  /* Header */
+  header.hero {
+    position: relative;
+    text-align: center;
+    padding: calc(40px + env(safe-area-inset-top)) 0 28px;
+  }
+  .avatar {
+    width: 112px;
+    height: 112px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: rgba(var(--accent-rgb), 0.16);
+    color: var(--accent-text);
+    font-size: 48px;
+    font-weight: 700;
+    border: 4px solid var(--card);
+    box-shadow: 0 6px 24px rgba(var(--accent-rgb), 0.28);
+  }
+  .avatar.emoji { font-size: 58px; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  h1 { font-size: 30px; font-size: clamp(28px, 7vw, 36px); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .birthday {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent-text);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .intro { margin: 0 auto; max-width: 30em; color: var(--muted); font-size: 16px; }
+  .summary { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+
+  /* Wishes */
+  .wishes { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 16px; }
+  .wish {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .wish.mine { background: var(--taken-bg); border-color: var(--taken-line); }
+  .wish.others { opacity: 0.62; }
+  .wish img.photo { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--skeleton); }
+  .wish .body { padding: 16px 18px 18px; }
+  .wish .top { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+  .wish h2 { font-size: 19px; line-height: 1.25; margin: 0; overflow-wrap: anywhere; }
+  .hearts { flex: none; font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+  .price { margin: 6px 0 0; font-weight: 600; color: var(--accent-text); }
+  .note { margin: 8px 0 0; color: var(--muted); overflow-wrap: anywhere; white-space: pre-line; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .actions > * { flex: 1 1 auto; }
+  .status {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 600;
+  }
+  .wish.mine .status { color: var(--taken-text); }
+  .wish.others .status { color: var(--muted); font-weight: 500; }
+
+  button, .button {
+    font: inherit;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 999px;
+    padding: 12px 20px;
+    min-height: 48px;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  button:active, .button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.6; cursor: default; transform: none; }
+  .primary { background: var(--button-bg); color: var(--button-text); flex: 1 1 auto; }
+  .primary:hover:not(:disabled) { filter: brightness(1.06); }
+  .secondary { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .quiet { background: transparent; color: inherit; text-decoration: underline; text-underline-offset: 3px; padding: 8px 4px; min-height: 44px; font-weight: 600; }
+  :focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
+
+  /* States */
+  .state { text-align: center; padding: 48px 12px; }
+  .state .big { font-size: 56px; line-height: 1; margin-bottom: 16px; }
+  .state h1 { font-size: 26px; }
+  .state p { color: var(--muted); max-width: 26em; margin: 0 auto 20px; }
+  .skeleton { border-radius: var(--radius); background: var(--skeleton); height: 132px; }
+  .skeleton.round { width: 112px; height: 112px; border-radius: 50%; margin: 0 auto 16px; }
+  .skeleton.line { height: 28px; width: 60%; margin: 0 auto 10px; border-radius: 10px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton { animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.45; } }
+  }
+  .visually-hidden {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  footer.foot { text-align: center; color: var(--muted); font-size: 14px; padding: 8px 16px calc(28px + env(safe-area-inset-bottom)); }
+  footer.foot p { margin: 4px 0; }
+  .visitor { font-size: 14px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 20px);
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: var(--text);
+    color: var(--bg);
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 10;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* Name dialog */
+  dialog {
+    border: 0;
+    border-radius: 24px;
+    padding: 24px;
+    width: min(420px, calc(100% - 32px));
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  dialog::backdrop { background: rgba(23, 18, 14, 0.45); }
+  dialog h2 { margin: 0 0 6px; font-size: 22px; }
+  dialog p { margin: 0 0 16px; color: var(--muted); }
+  dialog label { display: block; font-weight: 600; margin-bottom: 6px; }
+  dialog input {
+    width: 100%;
+    font: inherit;
+    font-size: 17px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+  }
+  dialog input:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25); }
+  dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* A little burst of joy when a gift is taken. */
+  .burst { position: fixed; pointer-events: none; font-size: 22px; z-index: 20; }
+  @media (prefers-reduced-motion: no-preference) {
+    .burst { animation: burst 1s ease-out forwards; }
+    @keyframes burst {
+      from { transform: translate(0, 0) scale(0.6); opacity: 1; }
+      to { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0; }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) { .burst { display: none; } }
+</style>
+</head>
+<body>
+<div id="top"></div>
+<main class="page" id="app" aria-busy="true">
+  <div class="state" role="status">
+    <div class="skeleton round"></div>
+    <div class="skeleton line"></div>
+    <p id="loading-text">Henter ønskelisten …</p>
+    <div class="skeleton"></div>
+  </div>
+</main>
+<footer class="foot">
+  <p class="visitor" id="visitor" hidden></p>
+  <p id="made-with">Laget med Familiekalender</p>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="name-dialog" aria-labelledby="name-title">
+  <form method="dialog" id="name-form">
+    <h2 id="name-title"></h2>
+    <p id="name-help"></p>
+    <label for="name-input" id="name-label"></label>
+    <input id="name-input" name="name" maxlength="60" autocomplete="name" autocapitalize="words" required>
+    <div class="row">
+      <button type="button" class="secondary" id="name-cancel"></button>
+      <button type="submit" class="primary" id="name-ok"></button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+
+// The wishlist Edge Function; the publishable key ships in the app too and is public.
+const API = "https://tiqpivwfrnehsinreeoa.supabase.co/functions/v1/wishlist";
+const API_KEY = "sb_publishable_q1Lf8jwypR5au1w1oG-VZw_JIUWMGkC";
+
+const NB = /^(nb|no|nn)\b/i.test(navigator.language || "");
+document.documentElement.lang = NB ? "nb" : "en";
+
+const T = NB ? {
+  loading: "Henter ønskelisten …",
+  title: (name) => `${name}${/[sxz]$/i.test(name) ? "'" : "s"} ønskeliste`,
+  plainTitle: "Ønskeliste",
+  birthday: (date) => `Bursdag ${date}`,
+  birthdayToday: "Bursdag i dag! 🎉",
+  inDays: (n) => n === 1 ? "i morgen" : `om ${n} dager`,
+  intro: "Trykk «Jeg kjøper denne» på gaven du vil gi, så slipper andre å kjøpe det samme.",
+  summary: (free, total) => free === total
+    ? `${total} ${total === 1 ? "ønske" : "ønsker"}, alle er ledige`
+    : `${free} av ${total} ønsker er fortsatt ledige`,
+  want: ["Fint å få", "Ønsker seg denne", "Ønsker seg denne aller mest"],
+  view: "Se varen",
+  viewLabel: (title) => `Se «${title}» i nettbutikken (åpnes i ny fane)`,
+  claim: "Jeg kjøper denne 🎁",
+  claimLabel: (title) => `Jeg kjøper «${title}»`,
+  takenBy: (name) => `Tatt av ${name} 🎁`,
+  undo: "Angre",
+  undoLabel: (title) => `Angre at du kjøper «${title}»`,
+  takenByOthers: "Noen har allerede kjøpt denne",
+  claimed: (title) => `Flott! Nå vet familien at du kjøper «${title}».`,
+  released: "Angret. Nå kan andre kjøpe den.",
+  tooLate: "Noen rakk det før deg – den er allerede tatt.",
+  failed: "Noe gikk galt. Prøv igjen.",
+  emptyTitle: "Ingen ønsker ennå",
+  emptyText: (name) => `${name} har ikke lagt inn noen ønsker ennå. Ta gjerne en titt senere!`,
+  invalidTitle: "Denne lenken virker ikke",
+  invalidText: "Den kan være gammel eller skrevet feil. Be familien om å sende deg en ny lenke.",
+  offlineTitle: "Fikk ikke kontakt",
+  offlineText: "Sjekk internettforbindelsen og prøv igjen.",
+  retry: "Prøv igjen",
+  nameTitle: "Hva heter du?",
+  nameHelp: (name) => `Så ser familien hvem som kjøper hva – ${name} får ikke vite det.`,
+  nameLabel: "Navnet ditt",
+  namePlaceholder: "For eksempel Bestemor",
+  cancel: "Avbryt",
+  next: "Fortsett",
+  visitor: (name) => `Du kjøper som ${name}.`,
+  changeName: "Bytt navn",
+  madeWith: "Laget med Familiekalender",
+} : {
+  loading: "Loading the wishlist …",
+  title: (name) => `${name}'s wishlist`,
+  plainTitle: "Wishlist",
+  birthday: (date) => `Birthday ${date}`,
+  birthdayToday: "Birthday today! 🎉",
+  inDays: (n) => n === 1 ? "tomorrow" : `in ${n} days`,
+  intro: "Tap “I'll buy this” on the present you'd like to give, so nobody else buys the same thing.",
+  summary: (free, total) => free === total
+    ? `${total} ${total === 1 ? "wish" : "wishes"}, all still available`
+    : `${free} of ${total} wishes still available`,
+  want: ["Nice to have", "Would love this", "Wants this the most"],
+  view: "View",
+  viewLabel: (title) => `View “${title}” in the shop (opens in a new tab)`,
+  claim: "I'll buy this 🎁",
+  claimLabel: (title) => `I'll buy “${title}”`,
+  takenBy: (name) => `Taken by ${name} 🎁`,
+  undo: "Undo",
+  undoLabel: (title) => `Undo buying “${title}”`,
+  takenByOthers: "Someone is already buying this",
+  claimed: (title) => `Lovely! The family now knows you're buying “${title}”.`,
+  released: "Undone. Others can buy it now.",
+  tooLate: "Someone got there first – it's already taken.",
+  failed: "Something went wrong. Please try again.",
+  emptyTitle: "No wishes yet",
+  emptyText: (name) => `${name} hasn't added any wishes yet. Take a look later!`,
+  invalidTitle: "This link doesn't work",
+  invalidText: "It may be old or mistyped. Ask the family to send you a new link.",
+  offlineTitle: "Couldn't connect",
+  offlineText: "Check your internet connection and try again.",
+  retry: "Try again",
+  nameTitle: "What's your name?",
+  nameHelp: (name) => `So the family knows who's buying what – ${name} won't see it.`,
+  nameLabel: "Your name",
+  namePlaceholder: "For example Grandma",
+  cancel: "Cancel",
+  next: "Continue",
+  visitor: (name) => `You're buying as ${name}.`,
+  changeName: "Change name",
+  madeWith: "Made with Family Calendar",
+};
+
+// Light and strong shades of the colours people pick in the app (both readable on this page).
+const COLORS = {
+  orange: ["249, 115, 22", "#C2410C", "#FDBA74"],
+  blue: ["59, 130, 246", "#1D4ED8", "#93C5FD"],
+  green: ["34, 197, 94", "#15803D", "#86EFAC"],
+  purple: ["168, 85, 247", "#7E22CE", "#D8B4FE"],
+  pink: ["236, 72, 153", "#BE185D", "#F9A8D4"],
+  teal: ["20, 184, 166", "#0F766E", "#5EEAD4"],
+  red: ["239, 68, 68", "#B91C1C", "#FCA5A5"],
+  yellow: ["234, 179, 8", "#A16207", "#FDE047"],
+  indigo: ["99, 102, 241", "#4338CA", "#A5B4FC"],
+  brown: ["180, 120, 70", "#8B5A2B", "#E0B98B"],
+};
+
+const token = new URLSearchParams(location.search).get("t") || "";
+const app = document.getElementById("app");
+// focusId: the card being acted on, so keyboard focus stays there while the list is redrawn.
+const state = { list: null, busy: new Set(), focusId: null };
+
+// ---------------------------------------------------------------------------
+// Remembering the visitor (only in this browser; the page works without it)
+// ---------------------------------------------------------------------------
+
+const NAME_KEY = "wishlist:name";
+const KEYS_KEY = `wishlist:keys:${token}`;
+
+function stored(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+function store(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Private browsing: claims still work, only the undo key is not kept.
+  }
+}
+let visitorName = stored(NAME_KEY, "");
+let claimKeys = stored(KEYS_KEY, {});
+if (typeof visitorName !== "string") visitorName = "";
+if (!claimKeys || typeof claimKeys !== "object") claimKeys = {};
+
+// ---------------------------------------------------------------------------
+// Small DOM helpers (text is always set as text, never as HTML)
+// ---------------------------------------------------------------------------
+
+function el(tag, attributes, ...children) {
+  const node = document.createElement(tag);
+  for (const [name, value] of Object.entries(attributes || {})) {
+    if (value === null || value === undefined || value === false) continue;
+    if (name === "class") node.className = value;
+    else if (name === "text") node.textContent = value;
+    else if (name.startsWith("on")) node.addEventListener(name.slice(2), value);
+    else node.setAttribute(name, value === true ? "" : String(value));
+  }
+  for (const child of children) if (child) node.append(child);
+  return node;
+}
+
+// replaceChildren is missing on the older iPads many grandparents still use.
+function setChildren(node, ...children) {
+  node.textContent = "";
+  for (const child of children) if (child) node.append(child);
+}
+
+function webUrl(value) {
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function firstName(name) {
+  return String(name || "").trim().split(/\s+/)[0] || "";
+}
+
+let toastTimer = 0;
+function toast(message) {
+  const node = document.getElementById("toast");
+  node.textContent = message;
+  node.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.classList.remove("show"), 3800);
+}
+
+function celebrate(from) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = from.getBoundingClientRect();
+  ["🎁", "🎉", "✨", "💝", "🎈", "✨"].forEach((symbol, i) => {
+    const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+    const bit = el("span", { class: "burst", "aria-hidden": "true", text: symbol });
+    bit.style.left = `${box.left + box.width / 2 - 11}px`;
+    bit.style.top = `${box.top - 6}px`;
+    bit.style.setProperty("--dx", `${Math.cos(angle) * 70}px`);
+    bit.style.setProperty("--dy", `${Math.sin(angle) * 60 - 40}px`);
+    document.body.append(bit);
+    setTimeout(() => bit.remove(), 1100);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Talking to the Edge Function
+// ---------------------------------------------------------------------------
+
+async function api(method, body) {
+  const response = await fetch(method === "GET" ? `${API}?t=${encodeURIComponent(token)}` : API, {
+    method,
+    headers: method === "GET" ? { apikey: API_KEY } : { apikey: API_KEY, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+  });
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    // An empty or broken answer is handled by the status below.
+  }
+  return { status: response.status, data };
+}
+
+// ---------------------------------------------------------------------------
+// Drawing
+// ---------------------------------------------------------------------------
+
+function showState(emoji, title, text, action) {
+  document.title = T.plainTitle;
+  app.setAttribute("aria-busy", "false");
+  setChildren(app, el("div", { class: "state" },
+    el("div", { class: "big", "aria-hidden": "true", text: emoji }),
+    el("h1", { text: title }),
+    el("p", { text }),
+    action || null,
+  ));
+}
+
+function birthdayText(value) {
+  const match = /^(\d{2})-(\d{2})$/.exec(value || "");
+  if (!match) return null;
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  // A leap year, so 29 February can be written out too.
+  const date = new Intl.DateTimeFormat(NB ? "nb-NO" : "en-GB", { day: "numeric", month: "long", timeZone: "UTC" })
+    .format(new Date(Date.UTC(2000, month - 1, day)));
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  let next = Date.UTC(now.getFullYear(), month - 1, day);
+  if (next < today) next = Date.UTC(now.getFullYear() + 1, month - 1, day);
+  const days = Math.round((next - today) / 86400000);
+  if (days === 0) return T.birthdayToday;
+  return days <= 60 ? `${T.birthday(date)} · ${T.inDays(days)}` : T.birthday(date);
+}
+
+function avatar(list, name) {
+  const photo = webUrl(list.avatar_url);
+  const fallback = () => {
+    const emoji = typeof list.emoji === "string" && list.emoji.trim();
+    return el("div", { class: `avatar rounded${emoji ? " emoji" : ""}`, "aria-hidden": "true", text: emoji || name.charAt(0).toUpperCase() || "🎁" });
+  };
+  if (!photo) return fallback();
+  const img = el("img", { src: photo, alt: "", referrerpolicy: "no-referrer", decoding: "async" });
+  const box = el("div", { class: "avatar" }, img);
+  img.addEventListener("error", () => box.replaceWith(fallback()));
+  return box;
+}
+
+function wishCard(wish, name) {
+  const key = claimKeys[wish.id];
+  const mine = Boolean(wish.claimed && key);
+  const others = Boolean(wish.claimed && !key);
+  const busy = state.busy.has(wish.id);
+  const want = Math.min(3, Math.max(1, Number(wish.want) || 2));
+  const title = String(wish.title || "");
+
+  const card = el("li", { class: `wish${mine ? " mine" : ""}${others ? " others" : ""}`, id: `wish-${wish.id}`, tabindex: "-1" });
+  const image = webUrl(wish.image_url);
+  if (image) {
+    const img = el("img", { class: "photo", src: image, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+    img.addEventListener("error", () => img.remove());
+    card.append(img);
+  }
+
+  const body = el("div", { class: "body" });
+  body.append(el("div", { class: "top" },
+    el("h2", { class: "rounded", text: title }),
+    el("span", { class: "hearts", role: "img", "aria-label": T.want[want - 1], title: T.want[want - 1], text: "❤️".repeat(want) + "🤍".repeat(3 - want) }),
+  ));
+  if (wish.price) body.append(el("p", { class: "price", text: String(wish.price) }));
+  if (wish.note) body.append(el("p", { class: "note", text: String(wish.note) }));
+
+  const link = webUrl(wish.url);
+  if (mine) {
+    body.append(el("div", { class: "status" },
+      el("span", { text: T.takenBy(wish.claimed_name || visitorName || (NB ? "deg" : "you")) }),
+      el("button", { type: "button", class: "quiet", disabled: busy, "aria-label": T.undoLabel(title), text: T.undo, onclick: () => release(wish) }),
+    ));
+    if (link) body.append(el("div", { class: "actions" }, el("a", { class: "button secondary", href: link, target: "_blank", rel: "noopener noreferrer", "aria-label": T.viewLabel(title), text: `${T.view} ↗` })));
+  } else if (others) {
+    body.append(el("div", { class: "status" }, el("span", { text: T.takenByOthers })));
+  } else {
+    // The main action first: on a phone the buttons stack.
+    const actions = el("div", { class: "actions" },
+      el("button", { type: "button", class: "primary", disabled: busy, "aria-label": T.claimLabel(title), text: T.claim, onclick: () => claim(wish) }));
+    if (link) actions.append(el("a", { class: "button secondary", href: link, target: "_blank", rel: "noopener noreferrer", "aria-label": T.viewLabel(title), text: `${T.view} ↗` }));
+    body.append(actions);
+  }
+  card.append(body);
+  return card;
+}
+
+function render() {
+  const list = state.list;
+  const name = firstName(list.name) || (NB ? "Familien" : "The family");
+  const colors = COLORS[list.color] || COLORS.pink;
+  const root = document.documentElement.style;
+  root.setProperty("--accent-rgb", colors[0]);
+  root.setProperty("--accent-strong", colors[1]);
+  root.setProperty("--accent-light", colors[2]);
+  document.title = T.title(name);
+  app.setAttribute("aria-busy", "false");
+
+  const wishes = Array.isArray(list.wishes) ? list.wishes : [];
+  // Keys for gifts that are no longer claimed (taken back elsewhere) are forgotten.
+  for (const id of Object.keys(claimKeys)) {
+    if (!wishes.some((wish) => wish.id === id && wish.claimed)) delete claimKeys[id];
+  }
+  store(KEYS_KEY, claimKeys);
+
+  const hero = el("header", { class: "hero" }, avatar(list, name), el("h1", { class: "rounded", text: T.title(name) }));
+  const birthday = birthdayText(list.birthday);
+  if (birthday) hero.append(el("p", { class: "birthday", text: `🎂 ${birthday}` }));
+  if (wishes.length > 0) {
+    hero.append(el("p", { class: "intro", text: T.intro }));
+    const free = wishes.filter((wish) => !wish.claimed).length;
+    hero.append(el("p", { class: "summary", text: T.summary(free, wishes.length) }));
+  }
+
+  const content = [hero];
+  if (wishes.length === 0) {
+    content.push(el("div", { class: "state" },
+      el("div", { class: "big", "aria-hidden": "true", text: "🌱" }),
+      el("h2", { text: T.emptyTitle }),
+      el("p", { text: T.emptyText(name) }),
+    ));
+  } else {
+    content.push(el("ul", { class: "wishes" }, ...wishes.map((wish) => wishCard(wish, name))));
+  }
+  // Keeps keyboard focus on the card that was in use when the list is redrawn.
+  const active = document.activeElement;
+  const activeCard = active && active.closest ? active.closest(".wish") : null;
+  const focusId = state.focusId || (activeCard ? activeCard.id : null);
+  setChildren(app, ...content);
+  const card = focusId ? document.getElementById(focusId) : null;
+  if (card && !state.busy.size) (card.querySelector("button:not(:disabled)") || card).focus();
+  showVisitor();
+}
+
+function showVisitor() {
+  const node = document.getElementById("visitor");
+  if (!visitorName || !state.list) {
+    node.hidden = true;
+    return;
+  }
+  node.hidden = false;
+  setChildren(node,
+    document.createTextNode(`${T.visitor(visitorName)} `),
+    el("button", { type: "button", class: "quiet", text: T.changeName, onclick: async () => {
+      const name = await askName(firstName(state.list.name), visitorName);
+      if (name) {
+        visitorName = name;
+        store(NAME_KEY, name);
+        showVisitor();
+      }
+    } }),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Asking for the visitor's name once
+// ---------------------------------------------------------------------------
+
+function askName(ownerName, current) {
+  const dialog = document.getElementById("name-dialog");
+  const input = document.getElementById("name-input");
+  document.getElementById("name-title").textContent = T.nameTitle;
+  document.getElementById("name-help").textContent = T.nameHelp(ownerName);
+  document.getElementById("name-label").textContent = T.nameLabel;
+  document.getElementById("name-cancel").textContent = T.cancel;
+  document.getElementById("name-ok").textContent = T.next;
+  input.placeholder = T.namePlaceholder;
+  input.value = current || "";
+
+  if (typeof dialog.showModal !== "function") {
+    const answer = window.prompt(T.nameTitle, current || "");
+    return Promise.resolve(answer && answer.trim() ? answer.trim().slice(0, 60) : null);
+  }
+  return new Promise((resolve) => {
+    const cancel = document.getElementById("name-cancel");
+    const done = (value) => {
+      cancel.onclick = null;
+      dialog.onclose = null;
+      resolve(value);
+    };
+    cancel.onclick = () => dialog.close("cancel");
+    dialog.onclose = () => {
+      const value = input.value.trim().slice(0, 60);
+      done(dialog.returnValue === "ok" && value ? value : null);
+    };
+    dialog.returnValue = "";
+    document.getElementById("name-form").onsubmit = (event) => {
+      event.preventDefault();
+      if (!input.value.trim()) {
+        input.focus();
+        return;
+      }
+      dialog.close("ok");
+    };
+    dialog.showModal();
+    input.focus();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Claiming and taking back
+// ---------------------------------------------------------------------------
+
+async function claim(wish) {
+  state.focusId = `wish-${wish.id}`;
+  try {
+    if (!visitorName) {
+      const name = await askName(firstName(state.list.name), "");
+      if (!name) return;
+      visitorName = name;
+      store(NAME_KEY, name);
+    }
+    state.busy.add(wish.id);
+    render();
+    try {
+      const { status, data } = await api("POST", { t: token, wish_id: wish.id, name: visitorName, claim: true });
+      if (status === 200 && data && typeof data.key === "string") {
+        claimKeys[wish.id] = data.key;
+        store(KEYS_KEY, claimKeys);
+        wish.claimed = true;
+        wish.claimed_name = visitorName;
+        state.busy.delete(wish.id);
+        render();
+        const card = document.getElementById(`wish-${wish.id}`);
+        if (card) celebrate(card.querySelector(".status") || card);
+        toast(T.claimed(wish.title));
+        return;
+      }
+      if (status === 409) {
+        wish.claimed = true;
+        wish.claimed_name = null;
+        toast(T.tooLate);
+      } else if (status === 404) {
+        state.busy.delete(wish.id);
+        return showState("🔗", T.invalidTitle, T.invalidText);
+      } else {
+        toast(T.failed);
+      }
+    } catch {
+      toast(T.failed);
+    }
+    state.busy.delete(wish.id);
+    render();
+  } finally {
+    state.focusId = null;
+  }
+}
+
+async function release(wish) {
+  const key = claimKeys[wish.id];
+  if (!key) return;
+  state.focusId = `wish-${wish.id}`;
+  try {
+    state.busy.add(wish.id);
+    render();
+    try {
+      const { status } = await api("POST", { t: token, wish_id: wish.id, claim: false, key });
+      if (status === 200) {
+        delete claimKeys[wish.id];
+        store(KEYS_KEY, claimKeys);
+        toast(T.released);
+        state.busy.delete(wish.id);
+        // What the server now says is the truth.
+        await load(true);
+        return;
+      }
+      toast(status === 404 ? T.invalidTitle : T.failed);
+    } catch {
+      toast(T.failed);
+    }
+    state.busy.delete(wish.id);
+    render();
+  } finally {
+    state.focusId = null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Loading
+// ---------------------------------------------------------------------------
+
+async function load(quiet) {
+  if (!/^[0-9a-f]{32,128}$/i.test(token)) {
+    return showState("🔗", T.invalidTitle, T.invalidText);
+  }
+  try {
+    const { status, data } = await api("GET");
+    if (status === 200 && data && typeof data === "object") {
+      state.list = data;
+      return render();
+    }
+    if (status === 404) return showState("🔗", T.invalidTitle, T.invalidText);
+    throw new Error(`status ${status}`);
+  } catch {
+    // A quiet refresh keeps showing the list it already has.
+    if (quiet && state.list) return render();
+    showState("📡", T.offlineTitle, T.offlineText,
+      el("button", { type: "button", class: "primary", text: T.retry, onclick: () => load(false) }));
+  }
+}
+
+document.getElementById("loading-text").textContent = T.loading;
+document.getElementById("made-with").textContent = T.madeWith;
+load(false);
+// Coming back to the tab shows what others have taken in the meantime.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && state.list && state.busy.size === 0) load(true);
+});
+</script>
+</body>
+</html>
