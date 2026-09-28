@@ -1,31 +1,203 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="nb">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Planner Invitation</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The link holds an invite code: never pass it on. -->
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FFF8F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17120E" media="(prefers-color-scheme: dark)">
+<title>Du er invitert til Familiekalender</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Familiekalender">
+<meta property="og:title" content="Bli med i familiekalenderen vår">
+<meta property="og:description" content="Planer, gjøremål, middag og handleliste for hele familien – i én app.">
+<meta property="og:image" content="https://staveeland.github.io/WeeklyPlanner/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="img/icon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<script>
+  // Safari's banner at the top: "Open" hands the invite straight to the app when it is installed.
+  (function () {
+    var code = (new URLSearchParams(location.search).get("code") || "").replace(/[^A-Za-z0-9]/g, "");
+    var argument = code ? ", app-argument=weeklyplanner://invite?code=" + code : "";
+    document.write('<meta name="apple-itunes-app" content="app-id=6705137677' + argument + '">');
+  })();
+</script>
+<style>
+  :root {
+    --bg: #FFF8F1;
+    --card: #FFFFFF;
+    --text: #2B2118;
+    --muted: #6B5A4C;
+    --line: rgba(43, 33, 24, 0.10);
+    --shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 10px 30px rgba(60, 40, 20, 0.10);
+    --brand: linear-gradient(90deg, #F7B515 0%, #F96755 32%, #E94C82 58%, #B75CC0 80%, #9366EC 100%);
+    --button-bg: #2B2118;
+    --button-text: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17120E;
+      --card: #231C17;
+      --text: #F6EEE7;
+      --muted: #BFAF9F;
+      --line: rgba(246, 238, 231, 0.10);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --button-bg: #F6EEE7;
+      --button-text: #17120E;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  body { line-height: 1.5; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+  main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto; padding: calc(36px + env(safe-area-inset-top)) 20px 24px; text-align: center; }
+  img { display: block; max-width: 100%; }
+  .logo { width: 132px; margin: 0 auto 22px; }
+  h1 { font-size: 34px; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 10px; font-weight: 800; }
+  h1 .name { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { color: var(--muted); font-size: 18px; margin: 0 0 26px; }
+
+  .code-card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 18px 18px 16px; margin: 0 0 22px; }
+  .code-card .label { color: var(--muted); font-size: 15px; margin: 0 0 4px; }
+  .code { font: 800 38px/1.2 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.12em; margin: 0 0 10px; user-select: all; -webkit-user-select: all; }
+  .copy { font: inherit; font-size: 16px; font-weight: 600; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; cursor: pointer; }
+
+  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 22px; text-align: left; }
+  ol.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 16px; margin: 0 0 12px; }
+  ol.steps li::before {
+    counter-increment: step; content: counter(step);
+    display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--brand); color: #fff; font-weight: 800;
+  }
+  ol.steps strong { display: block; font-size: 17px; }
+  ol.steps p { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+  .badge { display: inline-block; margin-top: 12px; line-height: 0; }
+  .badge img { height: 48px; width: auto; }
+  .badge .on-dark { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .badge .on-light { display: none; }
+    .badge .on-dark { display: block; }
+  }
+  .open-app { display: inline-block; margin-top: 12px; padding: 12px 22px; border-radius: 999px; background: var(--button-bg); color: var(--button-text); font-weight: 700; text-decoration: none; }
+
+  .small { color: var(--muted); font-size: 14px; margin: 18px 0 0; }
+  .small a { color: inherit; }
+  [hidden] { display: none !important; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
 </head>
 <body>
-    <h1>Weekly Planner Invitation</h1>
-    <p>If you have the app installed, it should open automatically.</p>
-    <p>If the app doesn't open, please install Weekly Planner from the App Store.</p>
-    <script>
-        function getQueryParam(param) {
-            var searchParams = new URLSearchParams(window.location.search);
-            return searchParams.get(param);
-        }
-        
-        var code = getQueryParam('code');
-        if (code) {
-            var appUrl = "weeklyplanner://invite?code=" + code;
-            window.location.href = appUrl;
-            
-            // Fallback to App Store after a delay
-            setTimeout(function() {
-                window.location.href = "https://apps.apple.com/us/app/weekly-family-planner/id6705137677";
-            }, 3000);
-        }
-    </script>
+<main>
+  <img class="logo" src="img/logo.png" alt="" width="132">
+  <h1><span id="title">Du er invitert til</span> <span class="name" id="name">Familiekalender</span></h1>
+  <p class="lead" id="lead">Planer, gjøremål, middag og handleliste for hele familien – i én app.</p>
+
+  <div class="code-card" id="code-card" hidden>
+    <p class="label" id="code-label">Koden din</p>
+    <p class="code" id="code"></p>
+    <button class="copy" id="copy" type="button">Kopier koden</button>
+  </div>
+
+  <ol class="steps">
+    <li><div><strong id="s1">Last ned Familiekalender</strong>
+      <p id="s1text">Gratis i 7 dager. For iPhone og iPad.</p>
+      <a class="badge" id="store" href="https://apps.apple.com/app/id6705137677">
+        <img class="on-light" src="img/app-store-no.svg" alt="Last ned fra App Store" data-badge="black">
+        <img class="on-dark" src="img/app-store-no-white.svg" alt="Last ned fra App Store" data-badge="white">
+      </a></div></li>
+    <li><div><strong id="s2">Logg inn med Apple</strong>
+      <p id="s2text">Ingen nye passord å huske.</p></div></li>
+    <li><div><strong id="s3">Åpne invitasjonen</strong>
+      <p id="s3text">Kom tilbake hit og trykk på knappen – eller skriv inn koden i appen under Familie → Bruk en kode.</p>
+      <a class="open-app" id="open" href="weeklyplanner://invite" hidden>Åpne i Familiekalender</a></div></li>
+  </ol>
+
+  <p class="small" id="more">Lurer du på hva det er? <a href="./?fra=invitasjon">Se hvordan Familiekalender fungerer</a>.</p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const NB = /^(nb|no|nn)\b/i.test(navigator.language || "");
+const T = NB ? {
+  copied: "Koden er kopiert",
+} : {
+  title: "You're invited to",
+  name: "Family Calendar",
+  lead: "Plans, chores, dinners and the shopping list for the whole family – in one app.",
+  codeLabel: "Your code",
+  copy: "Copy the code",
+  copied: "Code copied",
+  s1: "Download Family Calendar",
+  s1text: "Free for 7 days. For iPhone and iPad.",
+  s2: "Sign in with Apple",
+  s2text: "No new password to remember.",
+  s3: "Open the invitation",
+  s3text: "Come back here and tap the button – or type the code in the app under Family → Use a code.",
+  open: "Open in Family Calendar",
+  more: 'Wondering what it is? <a href="./?fra=invitasjon">See how Family Calendar works</a>.',
+  pageTitle: "You're invited to Family Calendar",
+};
+
+if (!NB) {
+  document.documentElement.lang = "en";
+  document.title = T.pageTitle;
+  for (const [id, key] of [["title", "title"], ["name", "name"], ["lead", "lead"], ["code-label", "codeLabel"],
+                           ["copy", "copy"], ["s1", "s1"], ["s1text", "s1text"], ["s2", "s2"], ["s2text", "s2text"],
+                           ["s3", "s3"], ["s3text", "s3text"], ["open", "open"]]) {
+    document.getElementById(id).textContent = T[key];
+  }
+  document.getElementById("more").innerHTML = T.more;
+  document.querySelectorAll("img[data-badge]").forEach((img) => {
+    img.src = img.dataset.badge === "white" ? "img/app-store-en-white.svg" : "img/app-store-en.svg";
+    img.alt = "Download on the App Store";
+  });
+}
+
+// The provider token from App Store Connect (App Analytics → Campaigns) counts downloads from invites.
+const PROVIDER_TOKEN = "";
+if (PROVIDER_TOKEN) {
+  document.getElementById("store").href = `https://apps.apple.com/app/apple-store/id6705137677?pt=${PROVIDER_TOKEN}&ct=invitasjon&mt=8`;
+}
+
+// Codes are letters and digits; anything else in the link is left out.
+const code = (new URLSearchParams(location.search).get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+if (code) {
+  document.getElementById("code").textContent = code;
+  document.getElementById("code-card").hidden = false;
+  const open = document.getElementById("open");
+  open.href = "weeklyplanner://invite?code=" + encodeURIComponent(code);
+  open.hidden = false;
+  document.getElementById("copy").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById("code"));
+      getSelection().removeAllRanges();
+      getSelection().addRange(range);
+      document.execCommand("copy");
+    }
+    const toast = document.getElementById("toast");
+    toast.textContent = T.copied;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  });
+}
+</script>
 </body>
 </html>
-

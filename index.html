@@ -1,12 +1,408 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="nb">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Planner</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Familiekalender – delt kalender, ukeplan og middag for hele familien</title>
+<meta name="description" content="Familiekalender samler hele familiens planer, gjøremål, middager og handleliste i én rolig app. Ta bilde av ukeplanen fra skolen, så legges avtalene inn. Gratis i 7 dager.">
+<link rel="canonical" href="https://staveeland.github.io/WeeklyPlanner/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FFF8F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17120E" media="(prefers-color-scheme: dark)">
+<!-- The banner at the top of Safari on iPhone: "Open" if the app is there, otherwise the App Store. -->
+<meta name="apple-itunes-app" content="app-id=6705137677">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Familiekalender">
+<meta property="og:title" content="Familiekalender – hele familien i én kalender">
+<meta property="og:description" content="Planer, gjøremål, middag og handleliste for hele familien. Ta bilde av ukeplanen, så legges avtalene inn.">
+<meta property="og:url" content="https://staveeland.github.io/WeeklyPlanner/">
+<meta property="og:image" content="https://staveeland.github.io/WeeklyPlanner/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="nb_NO">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="img/icon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Familiekalender",
+  "alternateName": "Family Calendar",
+  "operatingSystem": "iOS",
+  "applicationCategory": "LifestyleApplication",
+  "description": "Hele familiens planer, gjøremål, middager og handleliste i én app. Magisk import av ukeplaner og skoleskriv, Spond- og jobbkalendere, gjøremål med stjerner, middagsplan og ønskelister.",
+  "installUrl": "https://apps.apple.com/app/id6705137677",
+  "inLanguage": ["nb", "en"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "NOK" },
+  "author": { "@type": "Person", "name": "Petter Staveland" }
+}
+</script>
+<style>
+  :root {
+    --bg: #FFF8F1;
+    --card: #FFFFFF;
+    --text: #2B2118;
+    --muted: #6B5A4C;
+    --line: rgba(43, 33, 24, 0.10);
+    --shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 10px 30px rgba(60, 40, 20, 0.10);
+    --brand: linear-gradient(90deg, #F7B515 0%, #F96755 32%, #E94C82 58%, #B75CC0 80%, #9366EC 100%);
+    --radius: 22px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17120E;
+      --card: #231C17;
+      --text: #F6EEE7;
+      --muted: #BFAF9F;
+      --line: rgba(246, 238, 231, 0.10);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  body { line-height: 1.5; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: inherit; }
+  .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  header.top { padding: calc(18px + env(safe-area-inset-top)) 0 0; }
+  .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 700; font-size: 19px; }
+  .brand img { width: 44px; height: 44px; border-radius: 11px; box-shadow: 0 0 0 1px var(--line); }
+
+  .hero { display: grid; gap: 40px; align-items: center; padding-top: 48px; padding-bottom: 32px; }
+  @media (min-width: 860px) { .hero { grid-template-columns: 1.1fr 0.9fr; padding-top: 72px; padding-bottom: 48px; } }
+  .hero-logo { width: 150px; margin-bottom: 26px; }
+  h1 { font-size: clamp(42px, 7.2vw, 72px); line-height: 1.02; letter-spacing: -0.035em; margin: 0 0 20px; font-weight: 800; }
+  h1 span { display: block; }
+  h1 .second { display: inline-block; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.06em; }
+  .lead { font-size: clamp(18px, 2.3vw, 21px); color: var(--muted); margin: 0 0 30px; max-width: 34em; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; }
+  .badge { display: inline-block; line-height: 0; border-radius: 12px; }
+  .badge img { height: 56px; width: auto; }
+  .badge .on-dark { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .badge .on-light { display: none; }
+    .badge .on-dark { display: block; }
+  }
+  .cta-note { color: var(--muted); font-size: 15px; }
+  .hero-shot { justify-self: center; width: min(340px, 78vw); }
+  .hero-shot img { filter: drop-shadow(0 24px 40px rgba(60, 40, 20, 0.16)); }
+
+  section { padding: 44px 0; }
+  h2 { font-size: clamp(30px, 4.4vw, 42px); line-height: 1.1; letter-spacing: -0.025em; margin: 0 0 10px; font-weight: 800; }
+  .section-lead { color: var(--muted); font-size: 18px; margin: 0 0 28px; max-width: 40em; }
+
+  .gallery {
+    display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 8px 20px 24px; margin: 0 -20px; scrollbar-width: thin;
+  }
+  .gallery img {
+    flex: 0 0 auto; width: 236px; height: auto; aspect-ratio: 1320 / 2868; border-radius: 22px;
+    scroll-snap-align: center; box-shadow: var(--shadow); background: var(--card);
+  }
+  @media (min-width: 860px) { .gallery img { width: 256px; } }
+
+  .features { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 600px) { .features { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 900px) { .features { grid-template-columns: 1fr 1fr 1fr; } }
+  .feature { background: var(--card); border-radius: var(--radius); padding: 22px 22px 20px; box-shadow: var(--shadow); }
+  .feature .emoji { font-size: 30px; line-height: 1; }
+  .feature h3 { font-size: 19px; margin: 12px 0 6px; letter-spacing: -0.01em; }
+  .feature p { margin: 0; color: var(--muted); }
+
+  .steps { display: grid; gap: 16px; counter-reset: step; padding: 0; margin: 0; list-style: none; }
+  @media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .steps li { background: var(--card); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); font-size: 18px; }
+  .steps li::before {
+    counter-increment: step; content: counter(step);
+    display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--brand); color: #fff; font-weight: 800; margin-bottom: 12px;
+  }
+
+  .trust { display: grid; gap: 16px; }
+  @media (min-width: 760px) { .trust { grid-template-columns: repeat(3, 1fr); } }
+  .trust div { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
+  .trust strong { display: block; font-size: 18px; margin-bottom: 4px; }
+  .trust p { margin: 0; color: var(--muted); }
+
+  .faq details { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); margin: 0 0 12px; }
+  .faq summary { cursor: pointer; list-style: none; padding: 18px 52px 18px 22px; font-weight: 650; font-size: 18px; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 22px; top: 50%; transform: translateY(-50%); font-size: 24px; color: var(--muted); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq details p { margin: 0; padding: 0 22px 20px; color: var(--muted); }
+
+  .closing { text-align: center; padding: 56px 0 40px; }
+  .closing img.logo { width: 120px; margin: 0 auto 22px; }
+  .closing .cta { justify-content: center; }
+
+  footer.foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; padding: 24px 0 calc(32px + env(safe-area-inset-bottom)); }
+  footer.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
+  footer.foot nav { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  footer.foot a { text-decoration: none; }
+  footer.foot a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
-    <h1>Welcome to Weekly Planner</h1>
-    <p>This is the landing page for Weekly Planner app.</p>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/icon.png" alt="" width="44" height="44"><span data-i18n="name">Familiekalender</span></a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <img class="hero-logo" src="img/logo.png" alt="" width="150">
+      <h1><span data-i18n="h1a">Én familie.</span> <span class="second" data-i18n="h1b">Én kalender.</span></h1>
+      <p class="lead" data-i18n="lead">Planer, gjøremål, middag og handleliste for hele familien – også barna og hunden. Ta bilde av ukeplanen fra skolen, så legges avtalene inn for deg.</p>
+      <div class="cta">
+        <a class="badge store-link" href="https://apps.apple.com/app/id6705137677">
+          <img class="on-light" src="img/app-store-no.svg" alt="Last ned fra App Store" data-badge="black">
+          <img class="on-dark" src="img/app-store-no-white.svg" alt="Last ned fra App Store" data-badge="white">
+        </a>
+        <span class="cta-note" data-i18n="note">Gratis i 7 dager · iPhone, iPad og Apple Watch</span>
+      </div>
+    </div>
+    <div class="hero-shot">
+      <img src="img/hero-nb.webp" data-en="img/hero-en.webp" width="986" height="2100"
+           alt="Magisk import: tre avtaler funnet i ukeplanen fra skolen" data-alt-en="Magic import: three events found in the weekly plan from school">
+    </div>
+  </div>
+
+  <section id="bilder" aria-labelledby="gallery-title">
+    <div class="wrap">
+      <h2 id="gallery-title" data-i18n="galleryTitle">Se hvordan den ser ut</h2>
+      <p class="section-lead" data-i18n="galleryLead">Rolig og enkel – med en egen farge for hver i familien.</p>
+      <div class="gallery" tabindex="0" aria-label="Skjermbilder" data-aria-en="Screenshots">
+        <img src="img/screens/nb/2.jpg" data-en="img/screens/en/1.jpg" loading="lazy" width="1320" height="2868"
+             alt="Månedsvisning med familiens planer og været" data-alt-en="Month view with the family's plans and the weather">
+        <img src="img/screens/nb/3.jpg" data-en="img/screens/en/2.jpg" loading="lazy" width="1320" height="2868"
+             alt="I dag: hvem som kjører, hva som skal med, middag og vær" data-alt-en="Today: who drives, what to bring, dinner and the weather">
+        <img src="img/screens/nb/4.jpg" data-en="img/screens/en/5.jpg" loading="lazy" width="1320" height="2868"
+             alt="Gjøremål som gir stjerner for barna" data-alt-en="Chores that earn stars for the children">
+        <img src="img/screens/nb/5.jpg" data-en="img/screens/en/6.jpg" loading="lazy" width="1320" height="2868"
+             alt="Middagsplan for uken" data-alt-en="Dinner plan for the week">
+        <img src="img/screens/nb/6.jpg" data-en="img/screens/en/7.jpg" loading="lazy" width="1320" height="2868"
+             alt="Felles handleliste sortert etter avdeling" data-alt-en="Shared shopping list sorted by aisle">
+        <img src="img/screens/nb/7.jpg" data-en="img/screens/en/9.jpg" loading="lazy" width="1320" height="2868"
+             alt="Familien med barn og kjæledyr" data-alt-en="The family, with children and pets">
+        <img src="img/screens/nb/8.jpg" data-en="img/screens/en/4.jpg" loading="lazy" width="1320" height="2868"
+             alt="Trening fra Helse-appen på en felles toppliste" data-alt-en="Workouts from Apple Health on a family leaderboard">
+        <img src="img/screens/nb/9.jpg" data-en="img/screens/en/8.jpg" loading="lazy" width="1320" height="2868"
+             alt="Koble til ChatGPT, Claude eller Grok" data-alt-en="Connect ChatGPT, Claude or Grok">
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="features-title">
+    <div class="wrap">
+      <h2 id="features-title" data-i18n="featuresTitle">Alt familien trenger – på ett sted</h2>
+      <p class="section-lead" data-i18n="featuresLead">Mindre skriving, færre meldinger og ingen glemte gymsko.</p>
+      <div class="features">
+        <div class="feature"><div class="emoji" aria-hidden="true">📸</div>
+          <h3 data-i18n="f1t">Magisk import</h3>
+          <p data-i18n="f1">Ta bilde av ukeplanen, et skoleskriv eller en invitasjon. Avtalene legges inn på riktig person – med det som skal med.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">📅</div>
+          <h3 data-i18n="f2t">Spond, skole og jobb</h3>
+          <p data-i18n="f2">Hent inn kalenderne dere allerede bruker, så ser alle alt på ett sted. Familiens planer vises også i Kalender-appen og CarPlay.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🚗</div>
+          <h3 data-i18n="f3t">Hvem kjører?</h3>
+          <p data-i18n="f3">Avtal hvem som leverer og henter og hva som skal med. Om morgenen får du dagens planer og været, hvis du vil.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">⭐</div>
+          <h3 data-i18n="f4t">Gjøremål og stjerner</h3>
+          <p data-i18n="f4">Gjøremål som går på omgang, og daglige rutiner. Barna samler stjerner og sparer til belønninger de velger selv.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🍝</div>
+          <h3 data-i18n="f5t">Middag og handleliste</h3>
+          <p data-i18n="f5">Planlegg ukens middager. Oppskriftene fyller handlelisten, som sorterer seg selv etter butikken din.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🎁</div>
+          <h3 data-i18n="f6t">Ønskelister</h3>
+          <p data-i18n="f6">Del ønskelisten med besteforeldrene. De tar gaver i hemmelighet, så ingen kjøper det samme.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🏡</div>
+          <h3 data-i18n="f7t">To hjem</h3>
+          <p data-i18n="f7">Bytter og samværsplaner for barn som bor hos begge foreldrene – med det som gjelder barna, og ikke mer.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🐶</div>
+          <h3 data-i18n="f8t">Alle er med</h3>
+          <p data-i18n="f8">Barn, kjæledyr og besteforeldre uten telefon får egne planer, gjøremål og ønskeliste.</p></div>
+        <div class="feature"><div class="emoji" aria-hidden="true">🏃</div>
+          <h3 data-i18n="f9t">Tren sammen</h3>
+          <p data-i18n="f9">Treningsøkter fra Helse-appen på en felles toppliste med heiing – bare hvis du slår det på.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="start-title">
+    <div class="wrap">
+      <h2 id="start-title" data-i18n="startTitle">Kom i gang på et minutt</h2>
+      <p class="section-lead" data-i18n="startLead">En kort guide i appen setter opp resten.</p>
+      <ol class="steps">
+        <li data-i18n="s1">Last ned Familiekalender og logg inn med Apple – ingen nye passord.</li>
+        <li data-i18n="s2">Inviter familien med en lenke, og legg til barna og hunden.</li>
+        <li data-i18n="s3">Ta bilde av ukeplanen fra skolen. Resten ordner seg.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="trust-title">
+    <div class="wrap">
+      <h2 id="trust-title" data-i18n="trustTitle">Enkelt og trygt</h2>
+      <p class="section-lead" data-i18n="trustLead">Laget i Norge, for norske familier.</p>
+      <div class="trust">
+        <div><strong data-i18n="t1t">Gratis i 7 dager</strong>
+          <p data-i18n="t1">Deretter månedlig eller årlig abonnement. Med Familiedeling gjelder ett abonnement for opptil seks.</p></div>
+        <div><strong data-i18n="t2t">Dataene lagres i EU</strong>
+          <p data-i18n="t2">Vi selger dem aldri, viser ingen reklame og sporer deg ikke.</p></div>
+        <div><strong data-i18n="t3t">På norsk og engelsk</strong>
+          <p data-i18n="t3">Med norske helligdager, været fra Meteorologisk institutt og Spond.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 id="faq-title" data-i18n="faqTitle">Spørsmål og svar</h2>
+      <details>
+        <summary data-i18n="q1">Må alle i familien ha iPhone?</summary>
+        <p data-i18n="a1">Appen finnes for iPhone og iPad, med widgets og en app for Apple Watch. Barn og besteforeldre uten telefon kan likevel være med i familien, og andre kan følge planene i sin egen kalender (for eksempel Google eller Outlook) med en kalenderlenke.</p>
+      </details>
+      <details>
+        <summary data-i18n="q2">Hva koster det?</summary>
+        <p data-i18n="a2">Du prøver alt gratis i 7 dager. Etterpå velger du månedlig eller årlig abonnement i appen. Med Apples Familiedeling gjelder ett abonnement for opptil seks i familien.</p>
+      </details>
+      <details>
+        <summary data-i18n="q3">Fungerer det med Spond og skolen?</summary>
+        <p data-i18n="a3">Ja. Kalendere på iPhonen – som Spond, jobb og skole – hentes inn og holdes oppdatert av seg selv. Ukeplaner og skriv fra skolen tar du bilde av, så finner appen avtalene.</p>
+      </details>
+      <details>
+        <summary data-i18n="q4">Kan barna få sin egen profil?</summary>
+        <p data-i18n="a4">Ja. Barna får egne planer, gjøremål, stjerner og ønskeliste. Når de får egen telefon, flytter profilen over med en kode – med alt som ligger der.</p>
+      </details>
+      <details>
+        <summary data-i18n="q5">Hva med personvernet?</summary>
+        <p><span data-i18n="a5">Alt lagres i EU. Vi selger aldri data, viser ingen reklame og sporer deg ikke.</span> <a href="privacy-policy.html" data-i18n="a5link">Les personvernerklæringen</a>.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <img class="logo" src="img/logo.png" alt="" width="120">
+      <h2 data-i18n="closingTitle">Mer tid til det som er gøy</h2>
+      <p class="section-lead" style="margin: 0 auto 26px;" data-i18n="closingLead">Prøv Familiekalender gratis i 7 dager.</p>
+      <div class="cta">
+        <a class="badge store-link" href="https://apps.apple.com/app/id6705137677">
+          <img class="on-light" src="img/app-store-no.svg" alt="Last ned fra App Store" data-badge="black">
+          <img class="on-dark" src="img/app-store-no-white.svg" alt="Last ned fra App Store" data-badge="white">
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span data-i18n="made">Familiekalender · Laget i Norge av Petter Staveland</span>
+    <nav>
+      <a href="privacy-policy.html" data-i18n="privacy">Personvern</a>
+      <a href="mailto:staveeland@gmail.com" data-i18n="contact">Kontakt</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+// Norwegian is in the page itself (and what search engines read); everyone else gets English.
+const NB = /^(nb|no|nn)\b/i.test(navigator.language || "");
+if (!NB) {
+  const T = {
+    name: "Family Calendar",
+    h1a: "One family.",
+    h1b: "One calendar.",
+    lead: "Plans, chores, dinners and the shopping list for the whole family – the kids and the dog included. Snap the weekly plan from school, and the events are added for you.",
+    note: "Free for 7 days · iPhone, iPad and Apple Watch",
+    galleryTitle: "See what it looks like",
+    galleryLead: "Calm and simple – with a colour for everyone in the family.",
+    featuresTitle: "Everything the family needs – in one place",
+    featuresLead: "Less typing, fewer messages and no forgotten PE kit.",
+    f1t: "Magic import",
+    f1: "Snap a weekly plan, a school letter or an invitation. The events land on the right person – with what to bring.",
+    f2t: "Sports, school and work",
+    f2: "Bring in the calendars you already use, so everyone sees everything in one place. The family's plans show in Apple Calendar and CarPlay too.",
+    f3t: "Who's driving?",
+    f3: "Agree who drops off and who picks up, and what to bring. In the morning you get the day's plans and the weather, if you like.",
+    f4t: "Chores and stars",
+    f4: "Chores that take turns, and daily routines. Kids earn stars and save up for rewards they choose.",
+    f5t: "Dinner and shopping",
+    f5: "Plan the week's dinners. Recipes fill the shopping list, which sorts itself by your shop.",
+    f6t: "Wishlists",
+    f6: "Share the wishlist with the grandparents. They claim gifts in secret, so nobody buys the same thing.",
+    f7t: "Two homes",
+    f7: "Handovers and schedules for children who live with both parents – only what concerns the children.",
+    f8t: "Everyone's in",
+    f8: "Children, pets and grandparents without a phone get their own plans, chores and wishlist.",
+    f9t: "Train together",
+    f9: "Workouts from Apple Health on a family leaderboard with cheers – only if you turn it on.",
+    startTitle: "Up and running in a minute",
+    startLead: "A short guide in the app sets up the rest.",
+    s1: "Download Family Calendar and sign in with Apple – no new password.",
+    s2: "Invite the family with a link, and add the kids and the dog.",
+    s3: "Snap the weekly plan from school. The rest sorts itself out.",
+    trustTitle: "Simple and safe",
+    trustLead: "Made in Norway, for busy families.",
+    t1t: "Free for 7 days",
+    t1: "Then a monthly or yearly subscription. With Family Sharing, one subscription covers up to six.",
+    t2t: "Your data is stored in the EU",
+    t2: "We never sell it, show no ads and don't track you.",
+    t3t: "In English and Norwegian",
+    t3: "With the weather from the Norwegian Meteorological Institute on every day.",
+    faqTitle: "Questions and answers",
+    q1: "Does everyone need an iPhone?",
+    a1: "The app is for iPhone and iPad, with widgets and an Apple Watch app. Children and grandparents without a phone can still be part of the family, and others can follow the plans in their own calendar (Google or Outlook, for example) with a calendar link.",
+    q2: "What does it cost?",
+    a2: "You try everything free for 7 days. After that you choose a monthly or yearly subscription in the app. With Apple's Family Sharing, one subscription covers up to six in the family.",
+    q3: "Does it work with our sports club and school?",
+    a3: "Yes. Calendars on your iPhone – from sports clubs, work and school – are brought in and kept up to date by themselves. Snap weekly plans and letters from school, and the app finds the events.",
+    q4: "Can the kids have their own profile?",
+    a4: "Yes. Children get their own plans, chores, stars and wishlist. When they get a phone, the profile moves over with a code – with everything in it.",
+    q5: "What about privacy?",
+    a5: "Everything is stored in the EU. We never sell data, show no ads and don't track you.",
+    a5link: "Read the privacy policy",
+    closingTitle: "More time for the fun stuff",
+    closingLead: "Try Family Calendar free for 7 days.",
+    made: "Family Calendar · Made in Norway by Petter Staveland",
+    privacy: "Privacy",
+    contact: "Contact",
+  };
+  document.documentElement.lang = "en";
+  document.title = "Family Calendar – a shared calendar, chores and dinners for the whole family";
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const text = T[el.dataset.i18n];
+    if (text) el.textContent = text;
+  });
+  document.querySelectorAll("img[data-en]").forEach((img) => {
+    img.src = img.dataset.en;
+    if (img.dataset.altEn) img.alt = img.dataset.altEn;
+  });
+  document.querySelectorAll("[data-aria-en]").forEach((el) => el.setAttribute("aria-label", el.dataset.ariaEn));
+  document.querySelectorAll("img[data-badge]").forEach((img) => {
+    img.src = img.dataset.badge === "white" ? "img/app-store-en-white.svg" : "img/app-store-en.svg";
+    img.alt = "Download on the App Store";
+  });
+}
+
+// With the provider token from App Store Connect (App Analytics → Campaigns), the App Store buttons become
+// campaign links, and App Analytics shows the downloads that came from here, the wishlist or an invite.
+const PROVIDER_TOKEN = "";
+if (PROVIDER_TOKEN) {
+  const campaign = (new URLSearchParams(location.search).get("fra") || "nettside").replace(/[^a-z0-9-]/gi, "");
+  document.querySelectorAll("a.store-link").forEach((a) => {
+    a.href = `https://apps.apple.com/app/apple-store/id6705137677?pt=${PROVIDER_TOKEN}&ct=${campaign}&mt=8`;
+  });
+}
+</script>
 </body>
 </html>
