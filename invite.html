@@ -67,6 +67,9 @@
   .lead { color: var(--muted); font-size: 18px; margin: 0 0 26px; }
 
   .code-card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 18px 18px 16px; margin: 0 0 22px; }
+  .code-card summary { cursor: pointer; font-weight: 600; }
+  .code-card[open] summary { margin-bottom: 14px; }
+  .code-card .help { color: var(--muted); font-size: 14px; }
   .code-card .label { color: var(--muted); font-size: 15px; margin: 0 0 4px; }
   .code { font: 800 38px/1.2 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.12em; margin: 0 0 10px; user-select: all; -webkit-user-select: all; }
   .copy { font: inherit; font-size: 16px; font-weight: 600; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; cursor: pointer; }
@@ -105,27 +108,29 @@
 <main>
   <img class="logo" src="img/logo.png" alt="" width="132">
   <h1><span id="title">Du er invitert til</span> <span class="name" id="name">Familiekalender</span></h1>
-  <p class="lead" id="lead">Planer, gjøremål, middag og handleliste for hele familien – i én app.</p>
-
-  <div class="code-card" id="code-card" hidden>
-    <p class="label" id="code-label">Koden din</p>
-    <p class="code" id="code"></p>
-    <button class="copy" id="copy" type="button">Kopier koden</button>
-  </div>
+  <p class="lead" id="lead">Følg disse tre stegene for å bli med. Du trenger vanligvis ikke å skrive inn noen kode.</p>
 
   <ol class="steps">
     <li><div><strong id="s1">Last ned Familiekalender</strong>
-      <p id="s1text">Gratis i 7 dager. For iPhone og iPad.</p>
+      <p id="s1text">For iPhone og iPad. Har du appen allerede? Gå til steg 2.</p>
       <a class="badge" id="store" href="https://apps.apple.com/app/id6705137677">
         <img class="on-light" src="img/app-store-no.svg" alt="Last ned fra App Store" data-badge="black">
         <img class="on-dark" src="img/app-store-no-white.svg" alt="Last ned fra App Store" data-badge="white">
       </a></div></li>
-    <li><div><strong id="s2">Logg inn med Apple</strong>
-      <p id="s2text">Ingen nye passord å huske.</p></div></li>
-    <li><div><strong id="s3">Åpne invitasjonen</strong>
-      <p id="s3text">Kom tilbake hit og trykk på knappen – eller skriv inn koden i appen under Familie → Bruk en kode.</p>
-      <a class="open-app" id="open" href="weeklyplanner://invite" hidden>Åpne i Familiekalender</a></div></li>
+    <li><div><strong id="s2">Åpne appen og logg inn med Apple</strong>
+      <p id="s2text">Vent til du er inne i appen. Gå deretter tilbake til denne invitasjonen.</p></div></li>
+    <li><div><strong id="s3">Kom tilbake hit og bli med</strong>
+      <p id="s3text">Trykk «Bli med i familien» og bekreft i appen. Invitasjonskoden følger med automatisk.</p>
+      <a class="open-app" id="open" href="weeklyplanner://invite" hidden>Bli med i familien</a></div></li>
   </ol>
+
+  <details class="code-card" id="code-card" hidden>
+    <summary id="code-help-title">Virker ikke knappen?</summary>
+    <p class="help" id="code-help">Kopier koden og lim den inn i appen under Familie → Bruk en kode.</p>
+    <p class="label" id="code-label">Invitasjonskoden din</p>
+    <p class="code" id="code"></p>
+    <button class="copy" id="copy" type="button">Kopier koden</button>
+  </details>
 
   <p class="small" id="more">Lurer du på hva det er? <a href="./?fra=invitasjon">Se hvordan Familiekalender fungerer</a>.</p>
 </main>
@@ -138,17 +143,19 @@ const T = NB ? {
 } : {
   title: "You're invited to",
   name: "Family Calendar",
-  lead: "Plans, chores, dinners and the shopping list for the whole family – in one app.",
-  codeLabel: "Your code",
+  lead: "Follow these three steps to join. You usually do not need to enter a code.",
+  codeLabel: "Your invitation code",
+  codeHelpTitle: "Button not working?",
+  codeHelp: "Copy the code and paste it in the app under Family → Use a code.",
   copy: "Copy the code",
   copied: "Code copied",
   s1: "Download Family Calendar",
-  s1text: "Free for 7 days. For iPhone and iPad.",
-  s2: "Sign in with Apple",
-  s2text: "No new password to remember.",
-  s3: "Open the invitation",
-  s3text: "Come back here and tap the button – or type the code in the app under Family → Use a code.",
-  open: "Open in Family Calendar",
+  s1text: "For iPhone and iPad. Already have the app? Go to step 2.",
+  s2: "Open the app and sign in with Apple",
+  s2text: "Wait until you are signed in. Then return to this invitation.",
+  s3: "Come back here and join",
+  s3text: "Tap ‘Join the family’ and confirm in the app. Your invitation code is included automatically.",
+  open: "Join the family",
   more: 'Wondering what it is? <a href="./?fra=invitasjon">See how Family Calendar works</a>.',
   pageTitle: "You're invited to Family Calendar",
 };
@@ -157,7 +164,7 @@ if (!NB) {
   document.documentElement.lang = "en";
   document.title = T.pageTitle;
   for (const [id, key] of [["title", "title"], ["name", "name"], ["lead", "lead"], ["code-label", "codeLabel"],
-                           ["copy", "copy"], ["s1", "s1"], ["s1text", "s1text"], ["s2", "s2"], ["s2text", "s2text"],
+                           ["code-help-title", "codeHelpTitle"], ["code-help", "codeHelp"], ["copy", "copy"], ["s1", "s1"], ["s1text", "s1text"], ["s2", "s2"], ["s2text", "s2text"],
                            ["s3", "s3"], ["s3text", "s3text"], ["open", "open"]]) {
     document.getElementById(id).textContent = T[key];
   }
